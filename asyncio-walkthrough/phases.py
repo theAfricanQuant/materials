@@ -27,8 +27,7 @@ async def outer(callerid: str):
 
 async def main():
     """Wrap the coroutines into tasks and execute."""
-    results = await asyncio.gather(*(outer(i) for i in "ABC"))
-    return results
+    return await asyncio.gather(*(outer(i) for i in "ABC"))
 
 
 if __name__ == "__main__":

@@ -15,12 +15,11 @@ def scrape_jobs(location=None):
         URL = f"https://www.monster.com/jobs/search/\
                 ?q=Software-Developer&where={location}"
     else:
-        URL = f"https://www.monster.com/jobs/search/?q=Software-Developer"
+        URL = "https://www.monster.com/jobs/search/?q=Software-Developer"
     page = requests.get(URL)
 
     soup = BeautifulSoup(page.content, "html.parser")
-    results = soup.find(id="ResultsContainer")
-    return results
+    return soup.find(id="ResultsContainer")
 
 
 def filter_jobs_by_keyword(results, word):

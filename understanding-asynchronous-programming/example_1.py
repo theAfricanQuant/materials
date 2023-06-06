@@ -7,10 +7,8 @@ def task(name, work_queue):
     else:
         while not work_queue.empty():
             count = work_queue.get()
-            total = 0
             print(f"Task {name} running")
-            for x in range(count):
-                total += 1
+            total = len(range(count))
             print(f"Task {name} total: {total}")
 
 

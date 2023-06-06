@@ -21,8 +21,7 @@ def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
     if mask & selectors.EVENT_READ:
-        recv_data = sock.recv(1024)  # Should be ready to read
-        if recv_data:
+        if recv_data := sock.recv(1024):
             data.outb += recv_data
         else:
             print("closing connection to", data.addr)

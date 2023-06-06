@@ -85,8 +85,7 @@ class Message:
         }
         jsonheader_bytes = self._json_encode(jsonheader, "utf-8")
         message_hdr = struct.pack(">H", len(jsonheader_bytes))
-        message = message_hdr + jsonheader_bytes + content_bytes
-        return message
+        return message_hdr + jsonheader_bytes + content_bytes
 
     def _create_response_json_content(self):
         action = self.request.get("action")
@@ -97,21 +96,18 @@ class Message:
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         content_encoding = "utf-8"
-        response = {
+        return {
             "content_bytes": self._json_encode(content, content_encoding),
             "content_type": "text/json",
             "content_encoding": content_encoding,
         }
-        return response
 
     def _create_response_binary_content(self):
-        response = {
-            "content_bytes": b"First 10 bytes of request: "
-            + self.request[:10],
+        return {
+            "content_bytes": b"First 10 bytes of request: " + self.request[:10],
             "content_type": "binary/custom-server-binary-type",
             "content_encoding": "binary",
         }
-        return response
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
@@ -145,18 +141,12 @@ class Message:
         try:
             self.selector.unregister(self.sock)
         except Exception as e:
-            print(
-                f"error: selector.unregister() exception for",
-                f"{self.addr}: {repr(e)}",
-            )
+            print("error: selector.unregister() exception for", f"{self.addr}: {repr(e)}")
 
         try:
             self.sock.close()
         except OSError as e:
-            print(
-                f"error: socket.close() exception for",
-                f"{self.addr}: {repr(e)}",
-            )
+            print("error: socket.close() exception for", f"{self.addr}: {repr(e)}")
         finally:
             # Delete reference to socket object for garbage collection
             self.sock = None
@@ -187,7 +177,7 @@ class Message:
 
     def process_request(self):
         content_len = self.jsonheader["content-length"]
-        if not len(self._recv_buffer) >= content_len:
+        if len(self._recv_buffer) < content_len:
             return
         data = self._recv_buffer[:content_len]
         self._recv_buffer = self._recv_buffer[content_len:]

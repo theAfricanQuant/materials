@@ -38,10 +38,7 @@ async def fetch_html(url: str, session: ClientSession, **kwargs) -> str:
     resp = await session.request(method="GET", url=url, **kwargs)
     resp.raise_for_status()  # raise if status >= 400
     logger.info("Got response [%s] for URL: %s", resp.status, url)
-    html = await resp.text()  # For bytes: resp.read()
-
-    # Dont close session; let caller decide when to do that.
-    return html
+    return await resp.text()
 
 
 async def parse(url: str, session: ClientSession, **kwargs) -> set:
@@ -76,7 +73,6 @@ async def parse(url: str, session: ClientSession, **kwargs) -> set:
                 abslink = urllib.parse.urljoin(url, link)
             except (urllib.error.URLError, ValueError):
                 logger.exception("Error parsing URL: %s", link)
-                pass
             else:
                 found.add(abslink)
         logger.info("Found %d links for %s", len(found), url)
@@ -97,11 +93,10 @@ async def write_one(file: IO, url: str, **kwargs) -> None:
 async def bulk_crawl_and_write(file: IO, urls: set, **kwargs) -> None:
     """Crawl & write concurrently to `file` for multiple `urls`."""
     async with ClientSession() as session:
-        tasks = []
-        for url in urls:
-            tasks.append(
-                write_one(file=file, url=url, session=session, **kwargs)
-            )
+        tasks = [
+            write_one(file=file, url=url, session=session, **kwargs)
+            for url in urls
+        ]
         await asyncio.gather(*tasks)  # see also: return_exceptions=True
 
 

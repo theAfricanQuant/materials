@@ -58,8 +58,7 @@ start_connections(host, int(port), int(num_conns))
 
 try:
     while True:
-        events = sel.select(timeout=1)
-        if events:
+        if events := sel.select(timeout=1):
             for key, mask in events:
                 service_connection(key, mask)
         # Check for a socket being monitored to continue.
